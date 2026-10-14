@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ریوا | محصولات پاک‌کننده بهداشتی</title>
+
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #fff; }
+
+    /* هر صفحه: یک عکس + چند ناحیه‌ی قابل کلیک روی آن */
+    .page { display: none; position: relative; width: 100%; max-width: 1600px; margin: 0 auto; }
+    .page.active { display: block; }
+    .page img { display: block; width: 100%; height: auto; user-select: none; }
+
+    .hotspot { position: absolute; display: block; cursor: pointer; }
+
+    /* حالت اشکال‌یابی: آدرس را با ?debug باز کنید تا ناحیه‌های کلیک دیده شوند */
+    body.debug .hotspot { outline: 2px dashed #e6007e; background: rgba(230, 0, 126, .2); }
+  </style>
+</head>
+<body>
+
+  <div id="app"></div>
+
+  <script>
+    /* =====================================================================
+       تنظیمات سایت — برای اضافه کردن صفحه‌ی جدید فقط همین قسمت را ویرایش کنید
+       =====================================================================
+       هر صفحه:
+         id       : نام صفحه در آدرس (مثلاً #/products)
+         image    : نام فایل عکس (کنار index.html قرار بگیرد)
+         width    : عرض اصلی عکس (پیکسل)
+         height   : ارتفاع اصلی عکس (پیکسل)
+         hotspots : لیست ناحیه‌های قابل کلیک
+                    [x, y, عرض, ارتفاع, صفحه‌ی مقصد]  ← همه بر اساس پیکسل‌های عکس اصلی
+       برای پیدا کردن مختصات درست، سایت را با ?debug باز کنید.
+    ===================================================================== */
+
+    const PAGES = {
+      home: {
+        image: "riva-design.png",
+        width: 1040,
+        height: 2576,
+        hotspots: [
+          // منوی بالا
+          [843, 38, 56, 24, "home"],       // صفحه اصلی
+          [786, 38, 50, 24, "products"],   // محصولات
+          [905, 25, 55, 50, "home"],       // لوگو
+
+          // دسته‌بندی محصولات ← «مشاهده محصولات» (هر چهار کارت)
+          [832, 853, 96, 25, "products"],  // پد ظرفشویی
+          [591, 853, 96, 25, "products"],  // دستمال
+          [350, 853, 96, 25, "products"],  // لیف
+          [111, 853, 96, 25, "products"],  // محصولات اقتصادی
+
+          // مشاهده همه محصولات
+          [50, 630, 122, 22, "products"]
+        ]
+      },
+
+      products: {
+        image: "riva-design2.png",
+        width: 1040,
+        height: 2576,
+        hotspots: [
+          // منوی بالا
+          [843, 38, 56, 24, "home"],       // صفحه اصلی
+          [786, 38, 50, 24, "products"],   // محصولات
+          [905, 25, 55, 50, "home"]        // لوگو
+        ]
+      }
+
+      // نمونه برای صفحه‌ی بعدی:
+      // about: {
+      //   image: "riva-design3.png",
+      //   width: 1040,
+      //   height: 2000,
+      //   hotspots: [[843, 38, 56, 24, "home"]]
+      // }
+    };
+
+    const DEFAULT_PAGE = "home";
+
+    /* =====================================================================
+       کد نمایش صفحات (معمولاً نیازی به تغییر ندارد)
+       ===================================================================== */
+
+    const app = document.getElementById("app");
+    if (location.search.includes("debug")) document.body.classList.add("debug");
+
+    // ساخت همه‌ی صفحات
+    Object.entries(PAGES).forEach(([id, p]) => {
+      const section = document.createElement("section");
+      section.className = "page";
+      section.id = "page-" + id;
+
+      const img = document.createElement("img");
+      img.src = p.image;
+      img.alt = id;
+      img.draggable = false;
+      section.appendChild(img);
+
+      p.hotspots.forEach(([x, y, w, h, target]) => {
+        const a = document.createElement("a");
+        a.className = "hotspot";
+        a.href = "#/" + target;
+        a.style.left   = (x / p.width  * 100) + "%";
+        a.style.top    = (y / p.height * 100) + "%";
+        a.style.width  = (w / p.width  * 100) + "%";
+        a.style.height = (h / p.height * 100) + "%";
+        section.appendChild(a);
+      });
+
+      app.appendChild(section);
+    });
+
+    // نمایش صفحه‌ی درست بر اساس آدرس
+    function route() {
+      let id = location.hash.replace(/^#\/?/, "") || DEFAULT_PAGE;
+      if (!PAGES[id]) id = DEFAULT_PAGE;
+
+      document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
+      document.getElementById("page-" + id).classList.add("active");
+      window.scrollTo(0, 0);
+    }
+
+    window.addEventListener("hashchange", route);
+    route();
+  </script>
+</body>
+</html>
